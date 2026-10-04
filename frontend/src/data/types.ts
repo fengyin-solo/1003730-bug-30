@@ -18,6 +18,10 @@ export type ModuleMeta = {
   actions: string[]
   actionTargets: Record<string, string>
   metrics: string[]
+  /** 已办结状态：落到这些状态的记录不再算待办。不填时默认取状态序列最后一个。 */
+  closedStatuses?: string[]
+  /** 异常状态：落到这些状态的记录计入异常量。不填时用内置兜底规则。 */
+  abnormalStatuses?: string[]
 }
 
 export type PageResult = {

@@ -74,6 +74,7 @@
 import { computed, onMounted, ref } from 'vue'
 
 import {
+  computeStats,
   downloadEntries,
   listEntries,
   moduleMeta,
@@ -85,7 +86,7 @@ const meta = moduleMeta('communication')
 const columns = ["设备编号", "设备类型", "所属站点", "通讯协议", "信号强度", "最近通讯时刻", "维护人员", "设备状态"]
 const actions = ["登记故障", "确认恢复", "申请更换"]
 const statuses = ["通讯正常", "信号弱", "通讯中断", "待更换"]
-const stats = [{"label": "设备总数", "value": 0}, {"label": "通讯正常数", "value": 0}, {"label": "中断设备数", "value": 0}]
+const stats = ref<{ label: string; value: number }[]>([])
 
 const rows = ref<EntryRow[]>([])
 const total = ref(0)
@@ -128,6 +129,7 @@ function reload() {
     const payload = listEntries(meta.key, filters.value)
     rows.value = payload.items
     total.value = payload.total
+    stats.value = computeStats(meta.key)
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : '通讯系统列表读取失败'
   }

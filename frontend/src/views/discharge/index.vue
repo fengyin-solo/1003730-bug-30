@@ -74,6 +74,7 @@
 import { computed, onMounted, ref } from 'vue'
 
 import {
+  computeStats,
   downloadEntries,
   listEntries,
   moduleMeta,
@@ -85,7 +86,7 @@ const meta = moduleMeta('discharge')
 const columns = ["记录编号", "站点编号", "测量方法", "断面流量", "最大流速", "过水面积", "测量时间", "记录状态"]
 const actions = ["提交审核", "确认通过", "标记异常"]
 const statuses = ["已采集", "待审核", "已通过", "异常值"]
-const stats = [{"label": "今日测量次数", "value": 0}, {"label": "待审核记录", "value": 0}, {"label": "异常记录数", "value": 0}]
+const stats = ref<{ label: string; value: number }[]>([])
 
 const rows = ref<EntryRow[]>([])
 const total = ref(0)
@@ -128,6 +129,7 @@ function reload() {
     const payload = listEntries(meta.key, filters.value)
     rows.value = payload.items
     total.value = payload.total
+    stats.value = computeStats(meta.key)
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : '流量监测列表读取失败'
   }

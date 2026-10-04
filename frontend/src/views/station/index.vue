@@ -74,6 +74,7 @@
 import { computed, onMounted, ref } from 'vue'
 
 import {
+  computeStats,
   downloadEntries,
   listEntries,
   moduleMeta,
@@ -85,7 +86,7 @@ const meta = moduleMeta('station')
 const columns = ["站点编号", "站点名称", "站点类型", "所在河流", "经纬度坐标", "建站年份", "管理单位", "运行状态"]
 const actions = ["升级为加强", "登记故障", "撤销站点"]
 const statuses = ["正常运行", "设备故障", "汛期加强", "暂停运行", "已撤销"]
-const stats = [{"label": "站点总数", "value": 0}, {"label": "正常运行数", "value": 0}, {"label": "故障站点数", "value": 0}]
+const stats = ref<{ label: string; value: number }[]>([])
 
 const rows = ref<EntryRow[]>([])
 const total = ref(0)
@@ -128,6 +129,7 @@ function reload() {
     const payload = listEntries(meta.key, filters.value)
     rows.value = payload.items
     total.value = payload.total
+    stats.value = computeStats(meta.key)
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : '监测站点列表读取失败'
   }

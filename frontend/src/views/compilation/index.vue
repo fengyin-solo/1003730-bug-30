@@ -74,6 +74,7 @@
 import { computed, onMounted, ref } from 'vue'
 
 import {
+  computeStats,
   downloadEntries,
   listEntries,
   moduleMeta,
@@ -85,7 +86,7 @@ const meta = moduleMeta('compilation')
 const columns = ["成果编号", "整编年份", "站点编号", "整编类型", "原始记录数", "整编人", "审核人", "整编状态"]
 const actions = ["开始整编", "提交审核", "驳回整编"]
 const statuses = ["待整编", "整编中", "待审核", "已刊印", "已驳回"]
-const stats = [{"label": "待整编年度", "value": 0}, {"label": "整编中年度", "value": 0}, {"label": "已刊印成果", "value": 0}]
+const stats = ref<{ label: string; value: number }[]>([])
 
 const rows = ref<EntryRow[]>([])
 const total = ref(0)
@@ -128,6 +129,7 @@ function reload() {
     const payload = listEntries(meta.key, filters.value)
     rows.value = payload.items
     total.value = payload.total
+    stats.value = computeStats(meta.key)
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : '数据整编列表读取失败'
   }

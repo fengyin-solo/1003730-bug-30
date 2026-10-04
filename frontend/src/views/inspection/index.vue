@@ -3,7 +3,7 @@
     <header class="page-head">
       <div>
         <h2>巡检记录管理</h2>
-        <p class="page-desc">维护巡检记录，围绕记录编号、站点编号、巡检日期、巡检人员做登记、筛选与状态流转。</p>
+        <p class="page-desc">维护巡检记录，围绕记录编号、站点编号、巡检日期、巡检人员做登记、筛选与状态流转；地下水异常处置提交后会在此自动写入核查记录。</p>
       </div>
       <div class="page-actions">
         <button class="btn primary" type="button" @click="openCreate">登记巡检记录</button>
@@ -64,7 +64,7 @@
     </table>
 
     <footer class="page-foot">
-      <span>共 {{ total }} 条巡检记录记录</span>
+      <span>共 {{ total }} 条巡检记录</span>
       <span v-if="errorMessage" class="error-text">{{ errorMessage }}</span>
     </footer>
   </section>
@@ -74,6 +74,7 @@
 import { computed, onMounted, ref } from 'vue'
 
 import {
+  computeStats,
   downloadEntries,
   listEntries,
   moduleMeta,
@@ -85,7 +86,7 @@ const meta = moduleMeta('inspection')
 const columns = ["记录编号", "站点编号", "巡检日期", "巡检人员", "检查项目", "发现问题", "处理措施", "巡检状态"]
 const actions = ["完成巡检", "报告故障", "确认处置"]
 const statuses = ["待巡检", "已巡检", "发现故障", "已处置"]
-const stats = [{"label": "本月巡检次数", "value": 0}, {"label": "已巡检站点", "value": 0}, {"label": "待处置故障", "value": 0}]
+const stats = ref<{ label: string; value: number }[]>([])
 
 const rows = ref<EntryRow[]>([])
 const total = ref(0)
@@ -128,6 +129,7 @@ function reload() {
     const payload = listEntries(meta.key, filters.value)
     rows.value = payload.items
     total.value = payload.total
+    stats.value = computeStats(meta.key)
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : '巡检记录列表读取失败'
   }

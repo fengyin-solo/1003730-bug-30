@@ -74,6 +74,7 @@
 import { computed, onMounted, ref } from 'vue'
 
 import {
+  computeStats,
   downloadEntries,
   listEntries,
   moduleMeta,
@@ -85,7 +86,7 @@ const meta = moduleMeta('cableway')
 const columns = ["缆道编号", "所属站点", "跨度米数", "建成日期", "最近检修日", "荷载能力", "检修人员", "缆道状态"]
 const actions = ["安排检修", "完成检修", "停用缆道"]
 const statuses = ["正常运行", "需检修", "检修中", "已停用"]
-const stats = [{"label": "缆道总数", "value": 0}, {"label": "正常运行数", "value": 0}, {"label": "需检修数", "value": 0}]
+const stats = ref<{ label: string; value: number }[]>([])
 
 const rows = ref<EntryRow[]>([])
 const total = ref(0)
@@ -128,6 +129,7 @@ function reload() {
     const payload = listEntries(meta.key, filters.value)
     rows.value = payload.items
     total.value = payload.total
+    stats.value = computeStats(meta.key)
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : '测流缆道列表读取失败'
   }
